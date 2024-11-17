@@ -6,7 +6,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card';
-import { Feather, Github, Image, Zap } from 'lucide-react';
+import { Feather, Github, Image as ImageIcon, Zap } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
@@ -66,7 +66,7 @@ export default function LandingPage() {
 							</Card>
 							<Card>
 								<CardHeader>
-									<Image className="h-8 w-8 text-primary mb-2" />
+									<ImageIcon className="h-8 w-8 text-primary mb-2" />
 									<CardTitle>Custom Header Images</CardTitle>
 									<CardDescription>
 										Create unique, eye-catching header images for each of your
