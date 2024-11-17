@@ -1,19 +1,15 @@
-import OpenAI from 'openai';
+import { OpenAI } from 'openai';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
 	try {
 		const { title, apiKey } = await request.json();
 
-		if (!apiKey) {
+		if (!title || !apiKey) {
 			return NextResponse.json(
-				{ error: 'OpenAI API key is required' },
+				{ error: 'Missing required parameters' },
 				{ status: 400 }
 			);
-		}
-
-		if (!title) {
-			return NextResponse.json({ error: 'Title is required' }, { status: 400 });
 		}
 
 		const openai = new OpenAI({
@@ -21,32 +17,41 @@ export async function POST(request: Request) {
 		});
 
 		const completion = await openai.chat.completions.create({
+			model: 'gpt-4',
 			messages: [
 				{
 					role: 'system',
 					content:
-						'You are a professional blog writer who creates engaging, well-structured content in markdown format.',
+						'You are a professional blog writer. Write detailed, well-structured blog posts with proper markdown formatting.',
 				},
 				{
 					role: 'user',
-					content: `Write a detailed blog post with the title "${title}".
-                   Include an introduction, several main points with subheadings, and a conclusion.
-                   Format the content in markdown with proper headings (##), paragraphs, and bullet points where appropriate.
-                   The content should be engaging, informative, and around 500-800 words.`,
+					content: `Write a comprehensive blog post about: ${title}. Include proper markdown formatting with headers, subheaders, and relevant sections. Make it engaging and informative.`,
 				},
 			],
-			model: 'gpt-3.5-turbo',
 			temperature: 0.7,
-			max_tokens: 1500,
+			max_tokens: 2500,
 		});
 
-		const blogContent = completion.choices[0].message.content;
+		const content = completion.choices[0]?.message?.content;
 
-		return NextResponse.json({ content: blogContent });
+		if (!content) {
+			return NextResponse.json(
+				{ error: 'No content generated' },
+				{ status: 500 }
+			);
+		}
+
+		return NextResponse.json({ content });
 	} catch (error) {
-		console.error('Error generating blog post:', error);
+		console.error('Blog generation error:', error);
 		return NextResponse.json(
-			{ error: 'Failed to generate blog post' },
+			{
+				error:
+					error instanceof Error
+						? error.message
+						: 'Failed to generate blog post',
+			},
 			{ status: 500 }
 		);
 	}

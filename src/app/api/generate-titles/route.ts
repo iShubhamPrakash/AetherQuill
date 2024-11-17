@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 					role: 'user',
 					content: `Generate 10 creative, engaging, and SEO-friendly blog post titles about "${topic}".
                    Make them diverse in style (how-to, listicles, thought leadership, etc.).
-                   Return only the titles, one per line, without numbering.`,
+                   Return only the titles, one per line, without numbering or dashes.`,
 				},
 			],
 			model: 'gpt-3.5-turbo',

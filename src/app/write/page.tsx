@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
-import { OPENAI_KEY, REPLICATE_KEY } from '@/congif/constants';
+import { LOCAL_STORAGE_KEYS } from '@/config/constants';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronRight, Loader2 } from 'lucide-react';
 import Image from 'next/image';
@@ -71,7 +71,7 @@ export default function AIBlogWriter() {
 	};
 
 	const generateTitlesWithAI = async (topic: string) => {
-		const apiKey = localStorage.getItem(OPENAI_KEY);
+		const apiKey = localStorage.getItem(LOCAL_STORAGE_KEYS.OPENAI_KEY);
 
 		if (!apiKey) {
 			toast({
@@ -112,7 +112,7 @@ export default function AIBlogWriter() {
 	};
 
 	const generateBlogWithAI = async (title: string) => {
-		const apiKey = localStorage.getItem(OPENAI_KEY);
+		const apiKey = localStorage.getItem(LOCAL_STORAGE_KEYS.OPENAI_KEY);
 
 		if (!apiKey) {
 			toast({
@@ -136,18 +136,30 @@ export default function AIBlogWriter() {
 			});
 
 			if (!response.ok) {
-				const error = await response.json();
-				throw new Error(error.error || 'Failed to generate blog post');
+				const errorData = await response.json();
+				throw new Error(
+					errorData.error ||
+						`Failed to generate blog post: ${response.statusText}`
+				);
 			}
 
 			const data = await response.json();
+
+			if (!data.content) {
+				throw new Error('No content received from the API');
+			}
+
 			return data.content;
 		} catch (error) {
 			toast({
 				title: 'Error generating blog post',
-				description: (error as Error).message,
+				description:
+					error instanceof Error
+						? error.message
+						: 'Failed to generate blog post',
 				variant: 'destructive',
 			});
+			console.error('Blog generation error:', error);
 			return null;
 		}
 	};
@@ -176,20 +188,23 @@ export default function AIBlogWriter() {
 
 	const generateBlogPost = async () => {
 		setLoading(true);
+		try {
+			const generatedContent = await generateBlogWithAI(selectedTitle);
 
-		const generatedContent = await generateBlogWithAI(selectedTitle);
-
-		if (generatedContent) {
-			setGeneratedPosts((prev) => [...prev, generatedContent]);
-			setBlogPost(generatedContent);
-			setSelectedPostIndex(generatedPosts.length);
+			if (generatedContent) {
+				setGeneratedPosts((prev) => [...prev, generatedContent]);
+				setBlogPost(generatedContent);
+				setSelectedPostIndex(generatedPosts.length);
+			}
+		} catch (error) {
+			console.error('Error in generateBlogPost:', error);
+		} finally {
+			setLoading(false);
 		}
-
-		setLoading(false);
 	};
 
 	const generateImageWithAI = async (title: string) => {
-		const apiKey = localStorage.getItem(REPLICATE_KEY);
+		const apiKey = localStorage.getItem(LOCAL_STORAGE_KEYS.REPLICATE_KEY);
 
 		if (!apiKey) {
 			toast({
@@ -251,10 +266,11 @@ export default function AIBlogWriter() {
 	};
 
 	return (
-		<div className="flex flex-col min-h-screen">
+		<div className="flex flex-col min-h-screen relative">
+			<div className="h-1/2 w-full absolute  z-0 bg-gradient-to-b from-orange-100 to-white" />
 			<Navigation />
-			<main className="flex-1">
-				<div className="container mx-auto p-4 max-w-3xl">
+			<main className="flex-1 relative z-10">
+				<div className="container mx-auto p-4 max-w-6xl mt-8">
 					<Card>
 						<CardHeader>
 							<CardTitle>AI Blog Writer</CardTitle>
@@ -305,7 +321,11 @@ export default function AIBlogWriter() {
 											required
 										/>
 									</div>
-									<Button type="submit" className="mt-4" disabled={loading}>
+									<Button
+										type="submit"
+										className="mt-4 w-full"
+										disabled={loading}
+									>
 										{loading ? (
 											<>
 												<Loader2 className="mr-2 h-4 w-4 animate-spin" />{' '}

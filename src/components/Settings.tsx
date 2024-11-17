@@ -1,4 +1,5 @@
 'use client';
+
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -11,9 +12,9 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { LOCAL_STORAGE_KEYS } from '@/config/constants';
 import { Settings2 } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { OPENAI_KEY, REPLICATE_KEY } from '@/congif/constants';
+import { useEffect, useState } from 'react';
 
 export default function Settings() {
 	const [openAIKey, setOpenAIKey] = useState('');
@@ -22,16 +23,18 @@ export default function Settings() {
 
 	useEffect(() => {
 		// Load keys from localStorage when component mounts
-		const savedOpenAIKey = localStorage.getItem(OPENAI_KEY) || '';
-		const savedReplicateKey = localStorage.getItem(REPLICATE_KEY) || '';
+		const savedOpenAIKey =
+			localStorage.getItem(LOCAL_STORAGE_KEYS.OPENAI_KEY) || '';
+		const savedReplicateKey =
+			localStorage.getItem(LOCAL_STORAGE_KEYS.REPLICATE_KEY) || '';
 		setOpenAIKey(savedOpenAIKey);
 		setReplicateKey(savedReplicateKey);
 	}, []);
 
 	const handleSave = () => {
 		// Save both keys to localStorage
-		localStorage.setItem(OPENAI_KEY, openAIKey);
-		localStorage.setItem(REPLICATE_KEY, replicateKey);
+		localStorage.setItem(LOCAL_STORAGE_KEYS.OPENAI_KEY, openAIKey);
+		localStorage.setItem(LOCAL_STORAGE_KEYS.REPLICATE_KEY, replicateKey);
 		setOpen(false);
 	};
 
