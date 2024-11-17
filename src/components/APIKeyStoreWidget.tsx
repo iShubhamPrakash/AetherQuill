@@ -13,6 +13,7 @@ import { Key } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { OPENAI_KEY, REPLICATE_KEY } from '@/congif/constants';
 
 export default function APIKeyStoreWidget() {
 	const router = useRouter();
@@ -21,16 +22,16 @@ export default function APIKeyStoreWidget() {
 	const [replicateKey, setReplicateKey] = useState('');
 
 	useEffect(() => {
-		const savedOpenAIKey = localStorage.getItem('openai-key');
-		const savedReplicateKey = localStorage.getItem('replicate-key');
+		const savedOpenAIKey = localStorage.getItem(OPENAI_KEY);
+		const savedReplicateKey = localStorage.getItem(REPLICATE_KEY);
 
 		if (savedOpenAIKey) setOpenAIKey(savedOpenAIKey);
 		if (savedReplicateKey) setReplicateKey(savedReplicateKey);
 	}, []);
 
 	const handleSaveKeys = () => {
-		localStorage.setItem('openai-key', openAIKey);
-		localStorage.setItem('replicate-key', replicateKey);
+		localStorage.setItem(OPENAI_KEY, openAIKey);
+		localStorage.setItem(REPLICATE_KEY, replicateKey);
 
 		toast({
 			title: 'API Keys Stored Successfully',
